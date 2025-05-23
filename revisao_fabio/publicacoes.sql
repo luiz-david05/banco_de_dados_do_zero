@@ -167,3 +167,71 @@ WHERE n.descricao NOT IN (
 	SELECT descricao FROM nacionalidade
 	WHERE descricao LIKE 'Brasileira%'
 )
+
+-- l) Listagem dos livros contendo título, assunto 
+-- e preço, ordenada em ordem crescente por assunto.
+
+SELECT l.titulo, a.descricao AS assunto, l.valor FROM livro l
+JOIN assunto a ON a.cod = l.cod_assunto
+ORDER BY a.descricao;
+
+-- m) Listagem contendo os preços e os títulos dos livros, ordenada em 
+-- ordem decrescente de preço.
+SELECT titulo, valor FROM livro
+ORDER BY valor DESC;
+
+-- n) Listagem dos nomes dos autores brasileiros com mês e ano de nascimento,
+-- por ordem decrescente de idade e por ordem crescente de nome do autor.
+SELECT a.nome, EXTRACT(MONTH FROM a.dt_nascimento) AS mes_nascimento, EXTRACT(YEAR FROM a.dt_nascimento)
+AS ano_nascimento 
+FROM autor a
+JOIN nacionalidade n ON a.cod_nacionalidade = n.cod
+WHERE n.descricao LIKE 'Brasileira%'
+ORDER BY a.dt_nascimento, a.nome
+
+-- o) Listagem das editoras e dos títulos dos livros lançados pela editora,
+-- ordenada por nome da editora e pelo título do livro.
+SELECT e.razao_social, l.titulo  FROM editora e
+JOIN livro l ON e.cod = l.cod_editora
+ORDER BY e.razao_social, l.titulo
+
+-- p) Listagem de assuntos, contendo os títulos dos livros dos respectivos
+-- assuntos, ordenada pela descrição do assunto.
+SELECT a.descricao AS assunto, l.titulo FROM assunto a
+JOIN livro l ON a.cod = l.cod_assunto
+ORDER BY a.descricao
+
+-- q) Listagem dos nomes dos autores e os livros de sua autoria, ordenada pelo 
+-- nome do autor.
+SELECT a.nome, l.titulo 
+FROM autor a
+JOIN autor_livro au ON a.cod = au.cod_autor
+JOIN livro l ON l.cod = au.cod_livro
+ORDER BY a.nome
+
+-- r) Editoras que publicaram livros escritos pelo autor ‘Machado de Assis’.
+SELECT e.razao_social, l.titulo FROM editora e
+JOIN livro l ON e.cod = l.cod_editora
+JOIN autor_livro au ON au.cod_livro = l.cod
+JOIN autor a ON au.cod_autor = a.cod
+WHERE a.nome LIKE 'Machado de Assis';
+
+-- s) preço do livro mais caro publicado pela editora ‘Books Editora’ 
+-- sobre banco de dados.
+SELECT * FROM editora
+
+SELECT MAX(l.valor) AS valor, l.titulo FROM livro l
+JOIN editora e ON e.cod = l.cod_editora
+JOIN assunto a ON a.cod = l.cod_assunto
+WHERE e.razao_social LIKE 'Books Editora%' AND a.descricao LIKE 'Romance%'
+GROUP BY l.valor, l.titulo
+
+-- t) Nome e CPF do autor brasileiro que tenha nascido antes de 1° de janeiro de 1950
+-- e os títulos dos livros de sua autoria, ordenado pelo nome do autor e pelo título do livro.
+SELECT a.nome, a.cpf, l.titulo FROM autor a
+JOIN nacionalidade n ON a.cod_nacionalidade = n.cod
+JOIN autor_livro au ON a.cod = au.cod_autor
+JOIN livro l ON au.cod_livro = l.cod
+WHERE n.descricao LIKE 'Brasileira%'
+AND a.dt_nascimento < '1950-01-01'
+ORDER BY a.nome, l.titulo
